@@ -36,6 +36,16 @@ struct arm_spe_pkt {
 	uint64_t		payload;
 };
 
+/* spe data src definition for Altra processor */
+#define SPE_DATA_SRC_L1_DATA_CACHE		0x0
+#define SPE_DATA_SRC_L2_CACHE			0x8
+#define SPE_DATA_SRC_PEER_CPU			0x9
+#define SPE_DATA_SRC_LOCAL_CLUSTER		0xa
+#define SPE_DATA_SRC_SYSTEM_CACHE		0xb
+#define SPE_DATA_SRC_PEER_CLUSTER		0xc
+#define SPE_DATA_SRC_REMOTE			0xd
+#define SPE_DATA_SRC_DRAM			0xe
+
 /* Short header (HEADER0) and extended header (HEADER1) */
 #define SPE_HEADER0_PAD				0x0
 #define SPE_HEADER0_END				0x1

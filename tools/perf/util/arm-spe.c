@@ -36,6 +36,15 @@
 
 #define MAX_TIMESTAMP (~0ULL)
 
+// For Altra
+// overwrite mem_lvl definition beginning at LVL_L3(0x40)
+#define PERF_MEM_LVL_LOC_CLSTR	0x80 /* Local cluster*/
+#define PERF_MEM_LVL_PR_CLSTR	0x100 /* Peer cluster*/
+#define PERF_MEM_LVL_PR_CPU	0x200 /* Peer CPU */
+#define PERF_MEM_LVL_SLC	0x400 /* System cache */
+#define PERF_MEM_LVL_DRAM	0x800 /* DRAM */
+#define PERF_MEM_LVL_REM	0x1000 /* Remote */
+
 struct arm_spe {
 	struct auxtrace			auxtrace;
 	struct auxtrace_queues		queues;
@@ -321,12 +330,11 @@ static u64 arm_spe__synth_data_source(const struct arm_spe_record *record)
 		data_src.mem_op = PERF_MEM_OP_STORE;
 		/* just for test perf-c2c:
 		 * in arm-spe store op has no data source, fake L1_HIT */
-		data_src.mem_lvl = PERF_MEM_LVL_L1;
-		data_src.mem_lvl |= PERF_MEM_LVL_HIT;
+		data_src.mem_lvl = PERF_MEM_LVL_NA;
 	}
 
 	if (record->type & (ARM_SPE_LLC_ACCESS | ARM_SPE_LLC_MISS)) {
-		data_src.mem_lvl = PERF_MEM_LVL_L3;
+		//data_src.mem_lvl = PERF_MEM_LVL_L3;
 
 		if (record->type & ARM_SPE_LLC_MISS)
 			data_src.mem_lvl |= PERF_MEM_LVL_MISS;
@@ -342,7 +350,7 @@ static u64 arm_spe__synth_data_source(const struct arm_spe_record *record)
 	}
 
 	if (record->type & ARM_SPE_REMOTE_ACCESS)
-		data_src.mem_lvl |= PERF_MEM_LVL_REM_CCE1;
+		data_src.mem_lvl |= PERF_MEM_LVL_REM;
 
 	if (record->type & (ARM_SPE_TLB_ACCESS | ARM_SPE_TLB_MISS)) {
 		data_src.mem_dtlb = PERF_MEM_TLB_WK;
@@ -351,6 +359,35 @@ static u64 arm_spe__synth_data_source(const struct arm_spe_record *record)
 			data_src.mem_dtlb |= PERF_MEM_TLB_MISS;
 		else
 			data_src.mem_dtlb |= PERF_MEM_TLB_HIT;
+	}
+
+	switch(record->data_src) {
+	case SPE_DATA_SRC_L1_DATA_CACHE:
+		data_src.mem_lvl |= PERF_MEM_LVL_L1;
+		break;
+	case SPE_DATA_SRC_L2_CACHE:
+		data_src.mem_lvl |= PERF_MEM_LVL_L2;
+		break;
+	case SPE_DATA_SRC_PEER_CPU:
+		data_src.mem_lvl |= PERF_MEM_LVL_PR_CPU;
+		break;
+	case SPE_DATA_SRC_LOCAL_CLUSTER:
+		data_src.mem_lvl |= PERF_MEM_LVL_LOC_CLSTR;
+		break;
+	case SPE_DATA_SRC_SYSTEM_CACHE:
+		data_src.mem_lvl |= PERF_MEM_LVL_SLC;
+		break;
+	case SPE_DATA_SRC_PEER_CLUSTER:
+		data_src.mem_lvl |= PERF_MEM_LVL_PR_CLSTR;
+		break;
+	case SPE_DATA_SRC_REMOTE:
+		data_src.mem_lvl |= PERF_MEM_LVL_REM;
+		break;
+	case SPE_DATA_SRC_DRAM:
+		data_src.mem_lvl |= PERF_MEM_LVL_DRAM;
+		break;
+	default:
+		break;
 	}
 
 	return data_src.val;

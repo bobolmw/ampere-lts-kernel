@@ -196,13 +196,12 @@ static const char * const mem_lvl[] = {
 	"LFB",
 	"L2",
 	"L3",
-	"Local RAM",
-	"Remote RAM (1 hop)",
-	"Remote RAM (2 hops)",
-	"Remote Cache (1 hop)",
-	"Remote Cache (2 hops)",
-	"I/O",
-	"Uncached",
+	"Local Cluster",
+	"Peer Cluster",
+	"Peer CPU",
+	"System Cache",
+	"DRAM",
+	"Remote",
 };
 
 static const char * const mem_lvlnum[] = {
